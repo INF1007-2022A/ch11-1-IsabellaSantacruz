@@ -45,27 +45,44 @@ class Character:
 	:param defense: Le niveau de défense du personnage
 	:param level: Le niveau d'expérience du personnage
 	"""
-	def __init__(self, name:str, max_hp:int, attack:int, defense:int, level:int, weapon:Weapon) -> None:
-		self.name    = name
+	def __init__(self, name:str, max_hp:int, attack:int, defense:int, level:int) -> None:
+		self.__name    = name
 		self.max_hp  = max_hp
 		self.attack  = attack
 		self.defense = defense
 		self.level   = level
-		self.weapon  = weapon
+		self.weapon  = None
 		self.hp      = self.max_hp
+
+	@property
+	def name(self):
+		return self.__name
+
+	@property
+	def weapon(self):
+		return self.__weapon
+	
+	@weapon.setter
+	def weapon(self,val):
+		if val is None:
+			self.__weapon = Weapon.make_unarmed()
+		else:
+			self.__weapon = val
 	
 	def compute_damage(self, other):
 		numerateur = (2*self.level/5 + 2)*self.weapon.power*self.attack/other.defense
 		crit = 1
+		is_crit = False
 		if random.randint(1,16) == 1:
 			crit = 2
+			is_crit=True
 		modifier = crit*random.randrange(85,101)/100
 		dmg = (numerateur/50 + 2)*modifier
-		return dmg
+		return dmg,is_crit
 
 def deal_damage(attacker, defender):
 	# TODO: Calculer dégâts
-	dmg = attacker.compute_damage(defender)
+	dmg,crit = attacker.compute_damage(defender)
 	defender.hp = defender.hp-dmg
 	sortie = f"{attacker.name} used {attacker.weapon.name}"
 	sortie += f"\n  {defender.name} took {dmg} dmg"
